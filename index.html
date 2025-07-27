@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destination Explorer - Discover Amazing Places</title>
+    <style>
+        /* Theme Variables */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --accent-color: #2196F3;
+            --toast-bg: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        body.dark-mode {
+            --bg-color: #0a0a0a;
+            --text-color: #f5f5f5;
+            --card-bg: #1a1a1a;
+            --border-color: #333;
+            --accent-color: #64B5F6;
+            --toast-bg: #444444;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, var(--bg-color) 100%);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 60px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-color), #9C27B0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Theme Toggle Switch */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-color);
+            cursor: pointer;
+            user-select: none;
+            z-index: 1000;
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-switch input {
+            display: none;
+        }
+
+        .theme-switch .slider {
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 24px;
+            margin-right: 12px;
+            position: relative;
+            transition: background-color 0.3s;
+        }
+
+        .theme-switch .slider::before {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-switch input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        .theme-switch input:checked + .slider::before {
+            transform: translateX(26px);
+        }
+
+        /* Selector Section */
+        .selector-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .selector-section h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        select {
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            min-width: 300px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .reset-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Destination Info */
+        .destination-info {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .destination-info.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .destination-header {
+            position: relative;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: end;
+        }
+
+        .destination-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        }
+
+        .destination-title {
+            position: relative;
+            z-index: 2;
+            padding: 30px;
+            color: white;
+        }
+
+        .destination-title h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .destination-title .country {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .destination-content {
+            padding: 40px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .highlights {
+            background: linear-gradient(135deg, var(--accent-color), #9C27B0);
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            height: fit-content;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .highlights h4 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .highlights ul {
+            list-style: none;
+        }
+
+        .highlights li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .highlights li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .gallery {
+            margin-bottom: 40px;
+        }
+
+        .gallery h4 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-item {
+            position: relative;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .links-section {
+            background: var(--bg-color);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .links-section h4 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent-color);
+        }
+
+        .link-card .icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .link-card .info h5 {
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .link-card .info p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Toast System */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+        }
+
+        .toast {
+            min-width: 250px;
+            background-color: var(--toast-bg);
+            color: white;
+            text-align: center;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.5s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow-hover);
+            cursor: pointer;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast-success { background: linear-gradient(135deg, #28a745, #20c997) !important; }
+        .toast-error { background: linear-gradient(135deg, #dc3545, #e74c3c) !important; }
+        .toast-warning { background: linear-gradient(135deg, #ffc107, #f39c12) !important; color: black !important; }
+        .toast-info { background: linear-gradient(135deg, #17a2b8, #3498db) !important; }
+
+        .toast button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .destination-title h2 {
+                font-size: 2rem;
+            }
+
+            .theme-switch {
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+            }
+
+            select {
+                min-width: 250px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle Switch -->
+    <label class="theme-switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+        🌙 Dark Mode
+    </label>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌍 Destination Explorer</h1>
+            <p>Discover amazing places around the world with detailed information, stunning visuals, and official resources</p>
+        </div>
+
+        <!-- Selector Section -->
+        <div class="selector-section">
+            <h3>Choose Your Dream Destination</h3>
+            <select name="country" id="countrySelect">
+                <option selected disabled>🗺️ Select a destination to explore</option>
+                <option value="london">🇬🇧 London, United Kingdom</option>
+                <option value="geneva">🇨🇭 Geneva, Switzerland</option>
+                <option value="paris">🇫🇷 Paris, France</option>
+                <option value="rome">🇮🇹 Rome, Italy</option>
+                <option value="tokyo">🇯🇵 Tokyo, Japan</option>
+                <option value="newyork">🇺🇸 New York, USA</option>
+            </select>
+            <br>
+            <button class="reset-btn" id="resetBtn">🔄 Reset Selection</button>
+        </div>
+
+        <!-- Destination Info -->
+        <div id="destinationInfo" class="destination-info">
+            <!-- Content will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // Destination data
+        const destinations = {
+            london: {
+                name: "London",
+                country: "United Kingdom",
+                image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "London, the capital of England and the United Kingdom, is a 21st-century city with history stretching back to Roman times. At its centre stand the imposing Houses of Parliament, the iconic 'Big Ben' clock tower and Westminster Abbey, site of British monarch coronations. Across the Thames River, the London Eye observation wheel provides panoramic views of the South Bank cultural complex, and the entire city.",
+                highlights: [
+                    "Big Ben & Houses of Parliament",
+                    "Tower Bridge & Tower of London", 
+                    "British Museum & Tate Modern",
+                    "Buckingham Palace",
+                    "Hyde Park & Kensington Gardens",
+                    "West End Theatre District"
+                ],
+                stats: {
+                    population: "9.5M",
+                    area: "1,572 km²",
+                    founded: "47 AD",
+                    timezone: "GMT+0"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1526129318478-62ed807ebdf9?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "Visit London Official", url: "https://www.visitlondon.com", icon: "🏛️", desc: "Official tourism website" },
+                    { name: "Transport for London", url: "https://tfl.gov.uk", icon: "🚇", desc: "Public transport info" },
+                    { name: "British Museum", url: "https://www.britishmuseum.org", icon: "🏛️", desc: "World-famous museum" },
+                    { name: "London Eye", url: "https://www.londoneye.com", icon: "🎡", desc: "Iconic observation wheel" }
+                ]
+            },
+            geneva: {
+                name: "Geneva",
+                country: "Switzerland", 
+                image: "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "Geneva is a global city, a financial centre, and a worldwide centre for diplomacy due to the presence of numerous international organizations, including the headquarters of many agencies of the United Nations and the Red Cross. Located where the Rhône exits Lake Geneva, it is the capital of the Republic and Canton of Geneva.",
+                highlights: [
+                    "Jet d'Eau fountain",
+                    "United Nations Office",
+                    "CERN particle physics laboratory",
+                    "Lake Geneva boat cruises",
+                    "Old Town (Vieille Ville)",
+                    "Patek Philippe Museum"
+                ],
+                stats: {
+                    population: "203K",
+                    area: "15.9 km²",
+                    founded: "3000 BC",
+                    timezone: "CET+1"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1571115765543-0e8b5a6b2e1b?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1527838832700-5059252407fa?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "Geneva Tourism", url: "https://www.geneve.com", icon: "🏔️", desc: "Official city tourism" },
+                    { name: "CERN", url: "https://home.cern", icon: "⚛️", desc: "European physics research" },
+                    { name: "UN Geneva", url: "https://www.ungeneva.org", icon: "🌐", desc: "United Nations office" },
+                    { name: "Geneva Airport", url: "https://www.gva.ch", icon: "✈️", desc: "International airport" }
+                ]
+            },
+            paris: {
+                name: "Paris",
+                country: "France",
+                image: "https://images.unsplash.com/photo-1502602898536-47ad22581b52?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "Paris, France's capital, is a major European city and a global center for art, fashion, gastronomy and culture. Its 19th-century cityscape is crisscrossed by wide boulevards and the River Seine. Beyond such landmarks as the Eiffel Tower and the 12th-century, Gothic Notre-Dame cathedral, the city is known for its cafe culture and designer boutiques along the Rue du Faubourg Saint-Honoré.",
+                highlights: [
+                    "Eiffel Tower",
+                    "Louvre Museum & Mona Lisa",
+                    "Notre-Dame Cathedral",
+                    "Champs-Élysées & Arc de Triomphe",
+                    "Montmartre & Sacré-Cœur",
+                    "Seine River cruises"
+                ],
+                stats: {
+                    population: "2.1M",
+                    area: "105 km²",
+                    founded: "3rd Century BC",
+                    timezone: "CET+1"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1502602898536-47ad22581b52?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1541665912-2ceec3b2b8f1?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1522093007474-d86e9bf7ba6f?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "Paris Tourism Office", url: "https://www.parisinfo.com", icon: "🗼", desc: "Official Paris tourism" },
+                    { name: "Louvre Museum", url: "https://www.louvre.fr", icon: "🎨", desc: "World's largest art museum" },
+                    { name: "Eiffel Tower", url: "https://www.toureiffel.paris", icon: "🗼", desc: "Iconic iron tower" },
+                    { name: "RATP", url: "https://www.ratp.fr", icon: "🚇", desc: "Paris public transport" }
+                ]
+            },
+            rome: {
+                name: "Rome",
+                country: "Italy",
+                image: "https://images.unsplash.com/photo-1552832230-c0197040cd52?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "Rome, Italy's capital, is a sprawling, cosmopolitan city with nearly 3,000 years of globally influential art, architecture and culture on display. Ancient ruins such as the Forum and the Colosseum evoke the power of the former Roman Empire. Vatican City, headquarters of the Roman Catholic Church, has St. Peter's Basilica and the Sistine Chapel, famed for Michelangelo's ceiling.",
+                highlights: [
+                    "Colosseum & Roman Forum",
+                    "Vatican City & Sistine Chapel",
+                    "Pantheon",
+                    "Trevi Fountain",
+                    "Spanish Steps",
+                    "Trastevere neighborhood"
+                ],
+                stats: {
+                    population: "2.8M",
+                    area: "1,285 km²",
+                    founded: "753 BC",
+                    timezone: "CET+1"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1552832230-c0197040cd52?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "Roma Tourism", url: "https://www.turismoroma.it", icon: "🏛️", desc: "Official Rome tourism" },
+                    { name: "Vatican Museums", url: "https://www.museivaticani.va", icon: "⛪", desc: "Vatican art collections" },
+                    { name: "Colosseum", url: "https://www.coopculture.it", icon: "🏟️", desc: "Ancient amphitheater" },
+                    { name: "ATAC Roma", url: "https://www.atac.roma.it", icon: "🚌", desc: "Rome public transport" }
+                ]
+            },
+            tokyo: {
+                name: "Tokyo",
+                country: "Japan",
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "Tokyo, Japan's busy capital, mixes the ultramodern and the traditional, from neon-lit skyscrapers to historic temples. The opulent Meiji Shinto shrine is known for its towering gate and surrounding woods. The Imperial Palace sits amid large public gardens. The city's many museums offer exhibits ranging from classical art (in the Tokyo National Museum) to a reconstructed kabuki theater (in the Edo-Tokyo Museum).",
+                highlights: [
+                    "Shibuya Crossing",
+                    "Tokyo Skytree & Tokyo Tower",
+                    "Senso-ji Temple in Asakusa",
+                    "Meiji Shrine",
+                    "Tsukiji Fish Market",
+                    "Harajuku & Shibuya districts"
+                ],
+                stats: {
+                    population: "14M",
+                    area: "2,194 km²",
+                    founded: "1457 AD",
+                    timezone: "JST+9"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1513407030348-c983a97b98d8?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1542640244-7e672d6cef4e?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "Go Tokyo", url: "https://www.gotokyo.org", icon: "🗾", desc: "Official Tokyo tourism" },
+                    { name: "Tokyo Metro", url: "https://www.tokyometro.jp", icon: "🚇", desc: "Tokyo subway system" },
+                    { name: "Tokyo Skytree", url: "https://www.tokyo-skytree.jp", icon: "🗼", desc: "World's tallest tower" },
+                    { name: "Japan Rail Pass", url: "https://www.jrpass.com", icon: "🚅", desc: "Railway travel pass" }
+                ]
+            },
+            newyork: {
+                name: "New York",
+                country: "United States",
+                image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+                description: "New York City comprises 5 boroughs sitting where the Hudson River meets the Atlantic Ocean. At its core is Manhattan, a densely populated borough that's among the world's major commercial, financial and cultural centers. Its iconic sites include skyscrapers such as the Empire State Building and sprawling Central Park. Broadway theater is staged in neon-lit Times Square.",
+                highlights: [
+                    "Statue of Liberty & Ellis Island",
+                    "Central Park",
+                    "Times Square & Broadway",
+                    "Empire State Building",
+                    "Brooklyn Bridge",
+                    "9/11 Memorial & Museum"
+                ],
+                stats: {
+                    population: "8.3M",
+                    area: "783 km²",
+                    founded: "1624 AD",
+                    timezone: "EST-5"
+                },
+                gallery: [
+                    "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1500916434205-0c77489c6cf7?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1485871981521-5b1fd3805b88?auto=format&fit=crop&w=500&q=80",
+                    "https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=500&q=80"
+                ],
+                links: [
+                    { name: "NYC Tourism", url: "https://www.nycgo.com", icon: "🗽", desc: "Official NYC tourism" },
+                    { name: "MTA New York", url: "https://www.mta.info", icon: "🚇", desc: "NYC public transport" },
+                    { name: "Empire State Building", url: "https://www.esbnyc.com", icon: "🏢", desc: "Iconic skyscraper" },
+                    { name: "Central Park", url: "https://www.centralparknyc.org", icon: "🌳", desc: "Manhattan's green heart" }
+                ]
+            }
+        };
+
+        // Toast system
+        function showToast(message, type = "info", duration = 3000, undoCallback = null) {
+            const container = document.getElementById("toastContainer");
+            if (!container) return;
+
+            const toast = document.createElement("div");
+            toast.classList.add("toast");
+
+            let icon = "";
+            switch(type.toLowerCase()) {
+                case "success": toast.classList.add("toast-success"); icon = "✅ "; break;
+                case "error": toast.classList.add("toast-error"); icon = "❌ "; break;
+                case "warning": toast.classList.add("toast-warning"); icon = "⚠️ "; break;
+                case "info": default: toast.classList.add("toast-info"); icon = "ℹ️ "; break;
+            }
+
+            const content = document.createElement("div");
+            content.style.display = "flex";
+            content.style.alignItems = "center";
+            content.style.gap = "15px";
+            content.style.width = "100%";
+
+            const msgSpan = document.createElement("span");
+            msgSpan.textContent = icon + message;
+            content.appendChild(msgSpan);
+
+            if (undoCallback) {
+                const undoBtn = document.createElement("button");
+                undoBtn.textContent = "Undo";
+                undoBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    undoCallback();
+                    dismissToast(toast);
+                });
+                content.appendChild(undoBtn);
+            }
+
+            toast.appendChild(content);
+            container.appendChild(toast);
+
+            setTimeout(() => { toast.classList.add("show"); }, 100);
+
+            const autoRemove = setTimeout(() => { dismissToast(toast); }, duration);
+
+            toast.addEventListener("click", (e) => {
+                if (e.target.tagName !== 'BUTTON') {
+                    clearTimeout(autoRemove);
+                    dismissToast(toast);
+                }
+            });
+
+            // Swipe to dismiss
+            let startX = 0, currentX = 0, isDragging = false;
+            
+            toast.addEventListener('mousedown', (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                startX = e.clientX;
+                isDragging = true;
+                toast.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX;
+                const deltaX = currentX - startX;
+                toast.style.transform = `translateX(${deltaX}px)`;
+                toast.style.opacity = `${Math.max(0.3, 1 - Math.abs(deltaX) / 200)}`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                toast.style.cursor = 'pointer';
+
+                const deltaX = currentX - startX;
+                if (Math.abs(deltaX) > 100) {
+                    clearTimeout(autoRemove);
+                    toast.style.transform = `translateX(${deltaX > 0 ? '300px' : '-300px'})`;
+                    toast.style.opacity = '0';
+                    setTimeout(() => {
+                        if (toast.parentNode) toast.parentNode.removeChild(toast);
+                    }, 300);
+                } else {
+                    toast.style.transform = '';
+                    toast.style.opacity = '1';
+                }
+            });
+        }
+
+        function dismissToast(toast) {
+            toast.classList.remove("show");
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 500);
+        }
+
+        // Display destination info
+        function displayDestination(destinationKey) {
+            const destination = destinations[destinationKey];
+            if (!destination) return;
+
+            const infoContainer = document.getElementById('destinationInfo');
+            
+            // Show loading state
+            infoContainer.innerHTML = `
+                <div style="text-align: center; padding: 60px;">
+                    <div class="loading"></div>
+                    <p style="margin-top: 20px; opacity: 0.7;">Loading destination information...</p>
+                </div>
+            `;
+            infoContainer.classList.add('show');
+
+            // Simulate loading delay for better UX
+            setTimeout(() => {
+                infoContainer.innerHTML = `
+                    <div class="destination-header" style="background-image: url('${destination.image}')">
+                        <div class="destination-title">
+                            <h2>${destination.name}</h2>
+                            <div class="country">${destination.country}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="destination-content">
+                        <div class="info-grid">
+                            <div>
+                                <div class="description">${destination.description}</div>
+                                
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="value">${destination.stats.population}</div>
+                                        <div class="label">Population</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="value">${destination.stats.area}</div>
+                                        <div class="label">Area</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="value">${destination.stats.founded}</div>
+                                        <div class="label">Founded</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="value">${destination.stats.timezone}</div>
+                                        <div class="label">Timezone</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="highlights">
+                                <h4>✨ Top Attractions</h4>
+                                <ul>
+                                    ${destination.highlights.map(highlight => `<li>${highlight}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="gallery">
+                            <h4>📸 Photo Gallery</h4>
+                            <div class="gallery-grid">
+                                ${destination.gallery.map(img => `
+                                    <div class="gallery-item">
+                                        <img src="${img}" alt="${destination.name}" loading="lazy">
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="links-section">
+                            <h4>🔗 Official Resources & Links</h4>
+                            <div class="links-grid">
+                                ${destination.links.map(link => `
+                                    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card">
+                                        <div class="icon">${link.icon}</div>
+                                        <div class="info">
+                                            <h5>${link.name}</h5>
+                                            <p>${link.desc}</p>
+                                        </div>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }, 800);
+        }
+
+        // Event listeners
+        const sel = document.querySelector("#countrySelect");
+        const resetBtn = document.querySelector("#resetBtn");
+        const themeToggle = document.getElementById("themeToggle");
+
+        sel.addEventListener("change", function(e) {
+            const selectedDestination = e.target.value;
+            const destinationName = destinations[selectedDestination]?.name || selectedDestination;
+            
+            displayDestination(selectedDestination);
+            showToast(`🌍 Exploring ${destinationName}!`, "success", 2000);
+            
+            // Smooth scroll to destination info
+            setTimeout(() => {
+                document.getElementById('destinationInfo').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
+        });
+
+        resetBtn.addEventListener("click", function() {
+            const previousValue = sel.value;
+            const previousDestination = destinations[previousValue]?.name;
+            
+            sel.selectedIndex = 0;
+            document.getElementById('destinationInfo').classList.remove('show');
+
+            showToast("🔄 Selection reset!", "info", 4000, function undoReset() {
+                if (previousValue) {
+                    sel.value = previousValue;
+                    displayDestination(previousValue);
+                    showToast(`✅ Restored: ${previousDestination}`, "success");
+                }
+            });
+        });
+
+        themeToggle.addEventListener("change", function() {
+            document.body.classList.toggle("dark-mode", this.checked);
+            const mode = this.checked ? "🌙 Dark Mode" : "☀️ Light Mode";
+            showToast(`${mode} activated!`, "info", 2000);
+        });
+
+        // Gallery image click handler
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.gallery-item')) {
+                const img = e.target;
+                if (img.tagName === 'IMG') {
+                    // Create modal for full-size image view
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.9);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 10000;
+                        cursor: pointer;
+                    `;
+                    
+                    const modalImg = document.createElement('img');
+                    modalImg.src = img.src;
+                    modalImg.style.cssText = `
+                        max-width: 90%;
+                        max-height: 90%;
+                        object-fit: contain;
+                        border-radius: 10px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+                    `;
+                    
+                    modal.appendChild(modalImg);
+                    document.body.appendChild(modal);
+                    
+                    modal.addEventListener('click', () => {
+                        document.body.removeChild(modal);
+                    });
+                }
+            }
+        });
+
+        // Link click tracking
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.link-card')) {
+                const linkCard = e.target.closest('.link-card');
+                const linkName = linkCard.querySelector('h5').textContent;
+                showToast(`🔗 Opening ${linkName}...`, "info", 1500);
+            }
+        });
+
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            themeToggle.checked = true;
+            document.body.classList.add('dark-mode');
+        }
+
+        // Save theme preference
+        themeToggle.addEventListener('change', function() {
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+        });
+
+        // Welcome message
+        setTimeout(() => {
+            showToast("🎉 Welcome to Destination Explorer!", "success", 3000);
+        }, 1000);
+    </script>
+</body>
+</html>
